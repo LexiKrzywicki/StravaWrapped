@@ -40,6 +40,7 @@ class StravaWrapped():
             counts.append(count)
 
         occurences = list(zip(self.activities, counts))
+
         return dict(occurences)
     
     def get_furthest(self) -> dict:
