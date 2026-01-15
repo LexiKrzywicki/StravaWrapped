@@ -14,7 +14,8 @@ class StravaWrapped():
         activities = set(self.df['Activity Type'])
         return activities
 
-    def total_time(self) -> dict:
+    # returns time in minutes
+    def get_elapsed_time(self) -> dict:
         total_times = []
         for acitivty in self.activities:
             matches = self.df['Activity Type'] == acitivty
@@ -23,14 +24,18 @@ class StravaWrapped():
             total_times.append(total_time/60)  # Convert to minutes
         return dict(list(zip(self.activities, total_times)))
 
-    # Returns distance in miles
-    def total_distance(self) -> dict:
+    # Returns distance in miles for each activity
+    def get_total_distance(self) -> dict:
         total_distances = []
         for activity in self.activities:
             matches = self.df['Activity Type'] == activity
             total_distance = float(self.df[matches]['Distance'].sum())
             total_distances.append(total_distance)
         return dict(list(zip(self.activities, total_distances)))
+    
+    def get_greatest_distance(self) -> str:
+        max_pair = max(self.get_total_distance().items(), key=lambda item: item[1])
+        return str(max_pair[0]) 
     
     # Number times for each activity
     def get_occurences(self):
@@ -43,6 +48,11 @@ class StravaWrapped():
 
         return dict(occurences)
     
+    def max_occurence(self) -> str:
+        max_pair = max(self.get_occurences().items(), key=lambda item: item[1])
+        return str(max_pair[0])
+    
+    # returns furthest distance during one occurnace for each activity
     def get_furthest(self) -> dict:
         furthests = []
         for activity in self.activities:
@@ -66,9 +76,14 @@ class StravaWrapped():
     
     def graph_occurences(self) -> go.Figure:
         df = pd.DataFrame(list(self.get_occurences().items()), columns=['Key', 'Value'])
-        fig = px.bar(df, x='Key', y='Value', title='Number of times per acitivity', labels={'Key': 'Activity', 'Value': 'Occurences'})
+        fig = px.bar(df, x='Key', y='Value', labels={'Key': 'Activity', 'Value': 'Occurences'})
         return fig
-
+    
+    def graph_times(self) -> go.Figure:
+        df = pd.DataFrame(list(self.get_elapsed_time().items()), columns=['Key', 'Value'])
+        fig = px.bar(df, x='Key', y='Value', labels={'Key': 'Activity', 'Value': 'Elasped Time (min)'})
+        return fig
+    
 
 def main():
     df = pd.read_csv('activities.csv')
